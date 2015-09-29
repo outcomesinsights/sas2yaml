@@ -5,7 +5,7 @@ require 'sas2yaml/version'
 
 Gem::Specification.new do |spec|
   spec.name          = "sas2yaml"
-  spec.version       = Sas2yaml::VERSION
+  spec.version       = Sas2Yaml::VERSION
   spec.authors       = ["Ryan Duryea"]
   spec.email         = ["aguynamedryan@gmail.com"]
 
