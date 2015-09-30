@@ -13,6 +13,8 @@ Gem::Specification.new do |spec|
   spec.description   = Sas2Yaml::DESCRIPTION
   spec.homepage      = "https://github.com/outcomesinsights/sas2yaml"
 
+  spec.licenses      = ["MIT"]
+
   # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
   # delete this section to allow pushing this gem to any host.
   if spec.respond_to?(:metadata)
