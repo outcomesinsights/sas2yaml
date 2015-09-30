@@ -1,0 +1,21 @@
+#!/usr/bin/env ruby
+
+require "escort"
+require "bundler/setup"
+require "sas2yaml"
+
+Escort::App.create do |app|
+  app.version Sas2Yaml::VERSION
+  app.summary Sas2Yaml::SUMMARY
+  app.description Sas2Yaml::DESCRIPTION
+
+  app.action do |options, arguments|
+    begin
+      Sas2Yaml::AssembleCommand.new(options, arguments).execute
+    rescue
+      puts $!.message
+      puts $!.backtrace.join("\n")
+      raise
+    end
+  end
+end
