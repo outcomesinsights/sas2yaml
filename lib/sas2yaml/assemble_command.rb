@@ -1,6 +1,9 @@
-require_relative 'sas_processor'
-require_relative 'sassifier'
-require 'psych'
+# frozen_string_literal: true
+
+require "escort"
+require_relative "sas_processor"
+require_relative "sassifier"
+require "psych"
 
 module Sas2Yaml
   class AssembleCommand < ::Escort::ActionCommand::Base

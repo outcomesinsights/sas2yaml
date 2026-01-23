@@ -1,7 +1,8 @@
-# coding: utf-8
-lib = File.expand_path('../lib', __FILE__)
+# frozen_string_literal: true
+
+lib = File.expand_path("../lib", __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'sas2yaml/metadata'
+require "sas2yaml/metadata"
 
 Gem::Specification.new do |spec|
   spec.name          = "sas2yaml"
@@ -14,21 +15,28 @@ Gem::Specification.new do |spec|
   spec.homepage      = "https://github.com/outcomesinsights/sas2yaml"
 
   spec.licenses      = ["MIT"]
+  spec.required_ruby_version = ">= 3.1"
 
-  # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
-  # delete this section to allow pushing this gem to any host.
-  if spec.respond_to?(:metadata)
-    spec.metadata['allowed_push_host'] = "https://rubygems.org"
-  else
-    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
+  spec.metadata["allowed_push_host"] = "https://rubygems.org"
+  spec.metadata["homepage_uri"] = spec.homepage
+  spec.metadata["source_code_uri"] = spec.homepage
+  spec.metadata["changelog_uri"] = "#{spec.homepage}/blob/main/CHANGELOG.md"
+
+  spec.files         = Dir.chdir(__dir__) do
+    `git ls-files -z`.split("\x0").reject do |f|
+      (File.expand_path(f) == __FILE__) ||
+        f.start_with?("test/", ".git", ".github", "Gemfile")
+    end
   end
-
-  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
   spec.bindir        = "exe"
-  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.executables   = spec.files.grep(%r{\Aexe/}) { |f| File.basename(f) }
   spec.require_paths = ["lib"]
 
-  spec.add_development_dependency "bundler", "~> 1.10"
-  spec.add_development_dependency "rake", "~> 10.0"
   spec.add_dependency "escort", "~> 0.4.0"
+  spec.add_dependency "logger"  # Required for Ruby 3.5+ (used by escort)
+  spec.add_dependency "reline"  # Required for Ruby 3.5+ (used by escort)
+
+  spec.add_development_dependency "bundler", ">= 2.0"
+  spec.add_development_dependency "minitest", "~> 5.0"
+  spec.add_development_dependency "rake", ">= 13.0"
 end

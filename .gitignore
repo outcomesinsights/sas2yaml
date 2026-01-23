@@ -7,3 +7,10 @@
 /pkg/
 /spec/reports/
 /tmp/
+
+# Proprietary SEER Medicare data - do not commit
+/2015_seer_sas/
+/test_sas/
+
+# Built gems
+/*.gem

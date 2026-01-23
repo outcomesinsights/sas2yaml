@@ -1,8 +1,9 @@
 #!/usr/bin/env ruby
+# frozen_string_literal: true
 
-require "escort"
 require "bundler/setup"
 require "sas2yaml"
+require "sas2yaml/assemble_command"
 
 Escort::App.create do |app|
   app.version Sas2Yaml::VERSION
@@ -10,12 +11,10 @@ Escort::App.create do |app|
   app.description Sas2Yaml::DESCRIPTION
 
   app.action do |options, arguments|
-    begin
-      Sas2Yaml::AssembleCommand.new(options, arguments).execute
-    rescue
-      puts $!.message
-      puts $!.backtrace.join("\n")
-      raise
-    end
+    Sas2Yaml::AssembleCommand.new(options, arguments).execute
+  rescue StandardError => e
+    warn e.message
+    warn e.backtrace.join("\n")
+    raise
   end
 end
