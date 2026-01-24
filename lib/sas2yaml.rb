@@ -2,6 +2,7 @@
 
 require "sas2yaml/metadata"
 require "sas2yaml/logging"
+require "sas2yaml/parse_error"
 require "sas2yaml/rangifier"
 require "sas2yaml/sas_processor"
 require "sas2yaml/sassifier"

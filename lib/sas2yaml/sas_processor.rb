@@ -37,8 +37,12 @@ class SasProcessor
   @@infile_regexp = /^infile\s+/i
   @@op_regexp = %r{([+-/=*]+)}
 
+  attr_reader :file_path, :line_mappings, :original_lines
+
   def initialize(file_path)
     @file_path = file_path
+    @line_mappings = []  # Maps generated Ruby line numbers to SAS line numbers
+    @original_lines = [] # Stores original SAS file lines for error context
   end
 
   # Given blah01-blah02 or (blah01-blah02)
@@ -177,8 +181,13 @@ class SasProcessor
   def lines
     if @lines.nil?
       @lines = []
+      @line_mappings = []
       @mode = :skip
+      sas_line_num = 0
       File.open(@file_path).each_line do |l|
+        sas_line_num += 1
+        @original_lines << l.chomp
+
         # Strip out all comments from each line
         line = l.chomp.strip.gsub(@@comment_regexp, '')
 
@@ -195,19 +204,27 @@ class SasProcessor
         # Check for label first since it contains '=' and would match @@equals_regexp
         break if line.match(@@label_start_regexp)
 
-        case line
+        translated = case line
         when @@def_regexp
-          @lines << translate_def(line.downcase)
+          translate_def(line.downcase)
         when @@array_regexp
-          @lines << translate_array(line.downcase)
+          translate_array(line.downcase)
         when @@do_regexp
-          @lines << translate_do(line.downcase)
+          translate_do(line.downcase)
         when @@infile_regexp
-          @lines << translate_infile(line.downcase)
+          translate_infile(line.downcase)
         when @@equals_regexp
-          @lines << translate_equals(line.downcase)
+          translate_equals(line.downcase)
         when /^end;/
-          @lines << line.chop.downcase
+          line.chop.downcase
+        end
+
+        if translated
+          # Count how many lines the translation produced (for multi-line do blocks)
+          translated.lines.each do |_|
+            @line_mappings << sas_line_num
+          end
+          @lines << translated
         end
       end
     end

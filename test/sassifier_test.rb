@@ -93,4 +93,29 @@ class SassifierTest < Minitest::Test
 
     assert_same first_call, second_call
   end
+
+  def test_parse_error_with_invalid_code
+    code = "invalid ruby syntax here @@@"
+    sassifier = Sassifier.new(code)
+
+    error = assert_raises(ParseError) { sassifier.hash }
+    assert_match(/syntax error/, error.message)
+  end
+
+  def test_parse_error_with_processor_context
+    # Create a mock processor with line mappings and original lines
+    processor = Minitest::Mock.new
+    processor.expect(:line_mappings, [5])  # Ruby line 1 maps to SAS line 5
+    processor.expect(:line_mappings, [5])  # Called twice in the method
+    processor.expect(:original_lines, ["line 3", "line 4", "label bad = stuff", "line 6", "line 7"])
+    processor.expect(:original_lines, ["line 3", "line 4", "label bad = stuff", "line 6", "line 7"])
+    processor.expect(:file_path, "test.sas")
+
+    code = "invalid @@@"
+    sassifier = Sassifier.new(code, processor: processor)
+
+    error = assert_raises(ParseError) { sassifier.hash }
+    assert_equal "test.sas", error.file_path
+    assert_match(/syntax error/, error.message)
+  end
 end
