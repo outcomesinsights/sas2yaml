@@ -8,6 +8,7 @@ require "sas2yaml/sas_processor"
 require "sas2yaml/sassifier"
 require "sas2yaml/field"
 require "sas2yaml/layout"
+require "sas2yaml/formatters"
 
 module Sas2Yaml
   class << self

@@ -4,6 +4,7 @@
 require "bundler/setup"
 require "sas2yaml"
 require "sas2yaml/assemble_command"
+require "sas2yaml/formatters"
 require "optparse"
 
 options = {}
@@ -14,6 +15,15 @@ parser = OptionParser.new do |opts|
   opts.separator Sas2Yaml::DESCRIPTION
   opts.separator ""
   opts.separator "Options:"
+
+  opts.on("-f", "--format FORMAT", Sas2Yaml::Formatters::FORMATS,
+          "Output format (#{Sas2Yaml::Formatters::FORMATS.join(', ')})") do |format|
+    options[:format] = format
+  end
+
+  opts.on("-t", "--table-name NAME", "Table name for SQL output") do |name|
+    options[:table_name] = name
+  end
 
   opts.on("--verbose", "Enable verbose/debug output") do
     options[:verbose] = true
@@ -40,4 +50,4 @@ end
 
 Sas2Yaml.verbose! if options[:verbose]
 
-Sas2Yaml::AssembleCommand.new(ARGV).execute
+Sas2Yaml::AssembleCommand.new(ARGV, options).execute
