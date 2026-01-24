@@ -28,7 +28,7 @@ require_relative 'rangifier'
 class SasProcessor
   @@def_regexp = /@[^;]/
   @@array_regexp = /array/
-  @@label_start_regexp = /^label/i
+  @@label_start_regexp = /^\s*label\b/i
   @@comment_regexp =%r{/\*.*?\*/}m
   @@blank_line_regexp = /^$/
   @@mode = :skip
@@ -91,7 +91,8 @@ class SasProcessor
     line.gsub!(/^.*@/, '')
     parts = line.split(/\s+/)
     # Type information is always the last word on the line
-    type = parts.pop
+    # Strip trailing semicolon which may be the SAS statement terminator
+    type = parts.pop.chomp(';')
     # The name is always the second to the last word on the line
     name = fix_name(parts.pop)
 
@@ -191,6 +192,9 @@ class SasProcessor
         # Skip blank lines
         next if line.match(@@blank_line_regexp)
 
+        # Check for label first since it contains '=' and would match @@equals_regexp
+        break if line.match(@@label_start_regexp)
+
         case line
         when @@def_regexp
           @lines << translate_def(line.downcase)
@@ -202,9 +206,6 @@ class SasProcessor
           @lines << translate_infile(line.downcase)
         when @@equals_regexp
           @lines << translate_equals(line.downcase)
-        when @@label_start_regexp
-          # We hit the start of the labels, we can quit processing the file
-          break
         when /^end;/
           @lines << line.chop.downcase
         end

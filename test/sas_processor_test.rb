@@ -88,4 +88,44 @@ class SasProcessorTest < Minitest::Test
 
     refute lines.any? { |l| l.include?("Patient ID") }
   end
+
+  def test_stops_at_indented_label
+    processor = SasProcessor.new(fixture_path("with_indented_labels.sas"))
+    lines = processor.lines
+
+    # Should stop before label statements, even when indented
+    refute lines.any? { |l| l.include?("Unique Record") }
+    refute lines.any? { |l| l.include?("First Character") }
+
+    # Should have parsed the actual field definitions
+    assert lines.any? { |l| l.include?("'record_id'") }
+    assert lines.any? { |l| l.include?("'final_field'") }
+  end
+
+  def test_strips_trailing_semicolon_from_format
+    processor = SasProcessor.new(fixture_path("with_real_world_patterns.sas"))
+    lines = processor.lines
+
+    # The last field definition has a trailing semicolon that should be stripped
+    # @00063 final_char  $char10.;
+    assert lines.any? { |l| l.include?("'$char10.'") }
+    refute lines.any? { |l| l.include?("'$char10.;'") }
+
+    # Decimal format should also have semicolon stripped
+    # @00057 decimal_field  6.4
+    assert lines.any? { |l| l.include?("'6.4'") }
+    refute lines.any? { |l| l.include?("'6.4;'") }
+  end
+
+  def test_handles_leading_zeros_in_column_numbers
+    processor = SasProcessor.new(fixture_path("with_real_world_patterns.sas"))
+    lines = processor.lines
+
+    # @00001 should become at(1, ...)
+    assert lines.any? { |l| l.include?("at(1,") }
+    # @00016 should become at(16, ...)
+    assert lines.any? { |l| l.include?("at(16,") }
+    # @00031 should become at(31, ...)
+    assert lines.any? { |l| l.include?("at(31,") }
+  end
 end
