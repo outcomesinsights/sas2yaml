@@ -50,14 +50,15 @@ module Sas2Yaml
     module CsvFormatter
       def self.format(hash)
         CSV.generate do |csv|
-          csv << %w[name column length type format]
+          csv << %w[name column length type format label]
           hash.each do |_key, field|
             csv << [
               field[:name],
               field[:column],
               field[:length],
               field[:type],
-              field[:format]
+              field[:format],
+              field[:label]
             ]
           end
         end
@@ -74,7 +75,8 @@ module Sas2Yaml
           when :string then "VARCHAR(#{field[:length]})"
           else "VARCHAR(#{field[:length]})"
           end
-          "  #{field[:name]} #{sql_type}"
+          comment = field[:label] ? " -- #{field[:label]}" : ""
+          "  #{field[:name]} #{sql_type}#{comment}"
         end
 
         "CREATE TABLE #{table_name} (\n#{columns.join(",\n")}\n);"

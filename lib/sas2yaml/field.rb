@@ -3,15 +3,16 @@
 module Sas2Yaml
   # Represents a single field in a SAS layout
   class Field
-    attr_reader :name, :column, :length, :type, :format, :droppable
+    attr_reader :name, :column, :length, :type, :format, :droppable, :label
 
-    def initialize(name:, column:, length:, type:, format:, droppable: false)
+    def initialize(name:, column:, length:, type:, format:, droppable: false, label: nil)
       @name = name
       @column = column
       @length = length
       @type = type
       @format = format
       @droppable = droppable
+      @label = label
     end
 
     def droppable?
@@ -25,7 +26,10 @@ module Sas2Yaml
         length: @length,
         type: @type,
         format: @format
-      }.tap { |h| h[:droppable] = true if @droppable }
+      }.tap do |h|
+        h[:droppable] = true if @droppable
+        h[:label] = @label if @label
+      end
     end
 
     def ==(other)
@@ -35,7 +39,8 @@ module Sas2Yaml
         length == other.length &&
         type == other.type &&
         format == other.format &&
-        droppable == other.droppable
+        droppable == other.droppable &&
+        label == other.label
     end
 
     def to_s

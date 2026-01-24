@@ -94,8 +94,24 @@ class Sassifier
     if @_hash.nil?
       @_hash = {}
       run
+      merge_labels
     end
     @_hash
+  end
+
+  # Merge labels from the processor into the field hash
+  def merge_labels
+    return unless @_processor&.labels&.any?
+
+    @_processor.labels.each do |field_name, description|
+      key = field_name.to_sym
+      if @_hash.key?(key)
+        @_hash[key][:label] = description
+        Sas2Yaml.logger.debug("Merged label for #{field_name}: #{description.inspect}")
+      else
+        Sas2Yaml.logger.debug("Label for unknown field #{field_name}: #{description.inspect}")
+      end
+    end
   end
 
   # Given a SAS-orient type string, return the data type

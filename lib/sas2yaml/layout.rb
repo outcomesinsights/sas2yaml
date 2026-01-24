@@ -38,7 +38,8 @@ module Sas2Yaml
           length: attrs[:length],
           type: attrs[:type],
           format: attrs[:format],
-          droppable: attrs[:droppable] || false
+          droppable: attrs[:droppable] || false,
+          label: attrs[:label]
         )
       end
     end

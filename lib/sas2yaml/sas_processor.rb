@@ -37,12 +37,13 @@ class SasProcessor
   @@infile_regexp = /^infile\s+/i
   @@op_regexp = %r{([+-/=*]+)}
 
-  attr_reader :file_path, :line_mappings, :original_lines
+  attr_reader :file_path, :line_mappings, :original_lines, :labels
 
   def initialize(file_path)
     @file_path = file_path
     @line_mappings = []  # Maps generated Ruby line numbers to SAS line numbers
     @original_lines = [] # Stores original SAS file lines for error context
+    @labels = {}         # Stores field labels/descriptions
   end
 
   # Given blah01-blah02 or (blah01-blah02)
@@ -182,6 +183,7 @@ class SasProcessor
     if @lines.nil?
       @lines = []
       @line_mappings = []
+      @labels = {}
       @mode = :skip
       sas_line_num = 0
       File.open(@file_path).each_line do |l|
@@ -201,8 +203,27 @@ class SasProcessor
         # Skip blank lines
         next if line.match(@@blank_line_regexp)
 
-        # Check for label first since it contains '=' and would match @@equals_regexp
-        break if line.match(@@label_start_regexp)
+        # Check for label - switch to label parsing mode
+        if line.match(@@label_start_regexp)
+          @mode = :labels
+          # Remove 'label' keyword and parse any labels on this line
+          label_content = line.sub(/^\s*label\s+/i, '')
+          parse_label_line(label_content) unless label_content.empty?
+          next
+        end
+
+        # In label mode, parse label lines until we hit run/proc/data or another statement
+        if @mode == :labels
+          # End of labels section
+          if line.match(/^(run|proc|data)\b/i) || line.match(/^;$/)
+            @mode = :done
+            next
+          end
+          parse_label_line(line)
+          next
+        end
+
+        next if @mode == :done
 
         translated = case line
         when @@def_regexp
@@ -229,6 +250,22 @@ class SasProcessor
       end
     end
     @lines
+  end
+
+  # Parse a label line like: field_name = "Description"
+  # Handles lines with or without trailing semicolons
+  def parse_label_line(line)
+    # Remove trailing semicolon if present
+    line = line.chomp(';').strip
+    return if line.empty?
+
+    # Match: field_name = "description" or field_name = 'description'
+    if match = line.match(/^\s*(\w+)\s*=\s*["'](.*)["']\s*$/)
+      field_name = match[1].downcase
+      description = match[2]
+      @labels[field_name] = description
+      Sas2Yaml.logger.debug("Found label: #{field_name} = #{description.inspect}")
+    end
   end
 
   def save(file_path)

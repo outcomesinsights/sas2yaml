@@ -6,9 +6,9 @@ require "json"
 class FormattersTest < Minitest::Test
   def setup
     @hash = {
-      patient_id: { name: "patient_id", column: 1, length: 8, type: :integer, format: "8." },
+      patient_id: { name: "patient_id", column: 1, length: 8, type: :integer, format: "8.", label: "Patient ID" },
       name: { name: "name", column: 9, length: 20, type: :string, format: "$char20." },
-      amount: { name: "amount", column: 29, length: 10, type: :decimal, format: "10.2" }
+      amount: { name: "amount", column: 29, length: 10, type: :decimal, format: "10.2", label: "Payment Amount" }
     }
   end
 
@@ -35,17 +35,17 @@ class FormattersTest < Minitest::Test
 
     assert_instance_of String, output
     lines = output.strip.split("\n")
-    assert_equal "name,column,length,type,format", lines[0]
-    assert_match(/patient_id,1,8,integer,8\./, lines[1])
+    assert_equal "name,column,length,type,format,label", lines[0]
+    assert_match(/patient_id,1,8,integer,8\.,Patient ID/, lines[1])
   end
 
   def test_sql_format_with_default_table_name
     output = Sas2Yaml::Formatters.format(@hash, "sql")
 
     assert_match(/CREATE TABLE table_name/, output)
-    assert_match(/patient_id INTEGER/, output)
-    assert_match(/name VARCHAR\(20\)/, output)
-    assert_match(/amount DECIMAL\(10, 2\)/, output)
+    assert_match(/patient_id INTEGER -- Patient ID/, output)
+    assert_match(/name VARCHAR\(20\),/, output)  # No comment for field without label
+    assert_match(/amount DECIMAL\(10, 2\) -- Payment Amount/, output)
   end
 
   def test_sql_format_with_custom_table_name
