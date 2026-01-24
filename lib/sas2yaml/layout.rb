@@ -4,6 +4,7 @@ require "yaml"
 require_relative "field"
 require_relative "sas_processor"
 require_relative "sassifier"
+require_relative "validator"
 
 module Sas2Yaml
   # Represents a parsed SAS layout with structured field access
@@ -96,5 +97,18 @@ module Sas2Yaml
     end
 
     include Enumerable
+
+    # Validate the layout for overlaps, gaps, and other issues
+    # @param record_length [Integer, nil] Optional record length for bounds checking
+    # @return [Validator::ValidationResult] Result with valid?, errors, and warnings
+    def validate(record_length: nil)
+      Validator.new(@fields, record_length: record_length || self.record_length).validate
+    end
+
+    # Check if the layout is valid (no overlapping fields)
+    # @return [Boolean]
+    def valid?
+      validate.valid?
+    end
   end
 end

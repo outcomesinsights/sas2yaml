@@ -9,6 +9,7 @@ require "sas2yaml/sassifier"
 require "sas2yaml/field"
 require "sas2yaml/layout"
 require "sas2yaml/formatters"
+require "sas2yaml/validator"
 
 module Sas2Yaml
   class << self
