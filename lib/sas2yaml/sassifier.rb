@@ -1,3 +1,5 @@
+require_relative "logging"
+
 # Runs the code that we generate by translating a SAS file into Ruby
 #
 # This class uses "eval" to get it's job done, so be wary about what code
@@ -8,7 +10,7 @@ class Sassifier
   end
 
   def run
-    puts @_code
+    Sas2Yaml.logger.debug("Generated Ruby code:\n#{@_code}")
     # eval the code, using the current class's context
     # so that the code has access to the class's supporting methods
     eval @_code, binding()

@@ -33,6 +33,9 @@ Gem::Specification.new do |spec|
   spec.require_paths = ["lib"]
 
 
+  # logger becomes a bundled gem in Ruby 4.0+
+  spec.add_dependency "logger"
+
   spec.add_development_dependency "bundler", ">= 2.0"
   spec.add_development_dependency "minitest", "~> 5.0"
   spec.add_development_dependency "rake", ">= 13.0"

@@ -15,6 +15,10 @@ parser = OptionParser.new do |opts|
   opts.separator ""
   opts.separator "Options:"
 
+  opts.on("--verbose", "Enable verbose/debug output") do
+    options[:verbose] = true
+  end
+
   opts.on("-v", "--version", "Print version") do
     puts "sas2yaml #{Sas2Yaml::VERSION}"
     exit
@@ -33,5 +37,7 @@ if ARGV.empty?
   warn parser
   exit 1
 end
+
+Sas2Yaml.verbose! if options[:verbose]
 
 Sas2Yaml::AssembleCommand.new(ARGV).execute

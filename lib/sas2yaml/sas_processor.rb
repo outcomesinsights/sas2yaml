@@ -1,4 +1,5 @@
 require_relative 'rangifier'
+require_relative 'logging'
 
 # Translates SAS code into executable Ruby code
 #
@@ -118,9 +119,9 @@ class SasProcessor
     # We'll use the array's name as it appears in SAS to store the array
     # of field names
     # The array name starts as arr(10) so we'll chop off the part in parens
-    puts parts[1]
+    Sas2Yaml.logger.debug("Array definition part: #{parts[1]}")
     array_name = ivarify(parts[1].gsub(/\(.*/, ''))
-    puts array_name
+    Sas2Yaml.logger.debug("Array name: #{array_name}")
     # Spit out Ruby that assigns the array of field names to the array instance variable
     "#{array_name} = #{range}"
   end
@@ -168,7 +169,7 @@ class SasProcessor
 
   def translate_infile(line)
     md = /lrecl\s*=\s*(\d+)/.match(line)
-    puts md
+    Sas2Yaml.logger.debug("LRECL match: #{md.inspect}")
     return "" if md.nil?
     return "record_len(#{md[1]})"
   end

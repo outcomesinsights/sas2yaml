@@ -2,7 +2,9 @@
 
 require_relative "sas_processor"
 require_relative "sassifier"
+require_relative "logging"
 require "psych"
+require "tmpdir"
 
 module Sas2Yaml
   class AssembleCommand
@@ -12,13 +14,13 @@ module Sas2Yaml
 
     def execute
       @arguments.each do |sas_file|
-        puts "Processing #{sas_file}"
+        Sas2Yaml.logger.info("Processing #{sas_file}")
         processed_sas = SasProcessor.new(sas_file).lines.join("\n")
         sassy_file = File.join(Dir.tmpdir, File.basename(sas_file, '.*') + '.sassy')
         File.write(sassy_file, processed_sas)
-        puts "Temp at  #{sassy_file}"
+        Sas2Yaml.logger.debug("Temp file at #{sassy_file}")
         sassy = Sassifier.new(processed_sas)
-        puts "NUM COLUMNS: #{sassy.hash.keys.length}"
+        Sas2Yaml.logger.info("Found #{sassy.hash.keys.length} columns")
         file = sas_file.gsub(/\..+$/, '.yml')
         File.write(file, sassy.hash.to_yaml)
       end
