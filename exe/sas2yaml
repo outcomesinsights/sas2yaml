@@ -4,17 +4,34 @@
 require "bundler/setup"
 require "sas2yaml"
 require "sas2yaml/assemble_command"
+require "optparse"
 
-Escort::App.create do |app|
-  app.version Sas2Yaml::VERSION
-  app.summary Sas2Yaml::SUMMARY
-  app.description Sas2Yaml::DESCRIPTION
+options = {}
 
-  app.action do |options, arguments|
-    Sas2Yaml::AssembleCommand.new(options, arguments).execute
-  rescue StandardError => e
-    warn e.message
-    warn e.backtrace.join("\n")
-    raise
+parser = OptionParser.new do |opts|
+  opts.banner = "Usage: sas2yaml [options] FILE..."
+  opts.separator ""
+  opts.separator Sas2Yaml::DESCRIPTION
+  opts.separator ""
+  opts.separator "Options:"
+
+  opts.on("-v", "--version", "Print version") do
+    puts "sas2yaml #{Sas2Yaml::VERSION}"
+    exit
+  end
+
+  opts.on("-h", "--help", "Print this help") do
+    puts opts
+    exit
   end
 end
+
+parser.parse!
+
+if ARGV.empty?
+  warn "Error: No input files specified"
+  warn parser
+  exit 1
+end
+
+Sas2Yaml::AssembleCommand.new(ARGV).execute

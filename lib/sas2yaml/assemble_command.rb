@@ -1,14 +1,17 @@
 # frozen_string_literal: true
 
-require "escort"
 require_relative "sas_processor"
 require_relative "sassifier"
 require "psych"
 
 module Sas2Yaml
-  class AssembleCommand < ::Escort::ActionCommand::Base
+  class AssembleCommand
+    def initialize(arguments)
+      @arguments = arguments
+    end
+
     def execute
-      arguments.each do |sas_file|
+      @arguments.each do |sas_file|
         puts "Processing #{sas_file}"
         processed_sas = SasProcessor.new(sas_file).lines.join("\n")
         sassy_file = File.join(Dir.tmpdir, File.basename(sas_file, '.*') + '.sassy')
