@@ -32,7 +32,6 @@ class SasProcessor
   @@label_start_regexp = /^\s*label\b/i
   @@comment_regexp =%r{/\*.*?\*/}m
   @@blank_line_regexp = /^$/
-  @@mode = :skip
   @@do_regexp = /^do /
   @@equals_regexp = /=/
   @@infile_regexp = /^infile\s+/i
@@ -178,14 +177,14 @@ class SasProcessor
   def lines
     if @lines.nil?
       @lines = []
-      @@mode = :skip
+      @mode = :skip
       File.open(@file_path).each_line do |l|
         # Strip out all comments from each line
         line = l.chomp.strip.gsub(@@comment_regexp, '')
 
         # Once we hit a line with "input", start processing
-        @@mode = :process if line.match(/^input/i) || line.match(@@infile_regexp)
-        next if @@mode == :skip
+        @mode = :process if line.match(/^input/i) || line.match(@@infile_regexp)
+        next if @mode == :skip
 
         # @; is ignorable, so make it a blank line
         line.gsub!(/@;/, '')
