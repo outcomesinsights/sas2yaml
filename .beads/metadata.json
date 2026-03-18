@@ -1,0 +1,8 @@
+{
+  "database": "dolt",
+  "backend": "dolt",
+  "dolt_mode": "server",
+  "dolt_server_port": 3308,
+  "dolt_database": "beads_sas2yaml",
+  "project_id": "4b460dda-68a6-4683-8860-2597db5689d4"
+}
